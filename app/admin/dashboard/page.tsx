@@ -15,7 +15,6 @@ import { LeadsTable } from '@/components/admin/LeadsTable'
 import { Badge } from '@/components/ui/Badge'
 import { getEstatisticas } from '@/lib/actions/imoveis'
 import { getLeadsRecentes } from '@/lib/actions/leads'
-import { formatarData } from '@/lib/utils'
 
 export const metadata: Metadata = {
   title: 'Dashboard | Admin',

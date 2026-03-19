@@ -37,7 +37,6 @@ export default function AdminImoveisPage() {
   const [busca, setBusca] = useState('')
   const [buscaInput, setBuscaInput] = useState('')
   const [isLoading, setIsLoading] = useState(true)
-  useTransition()
 
   const [deleteModal, setDeleteModal] = useState<{ open: boolean; imovel: Imovel | null }>({
     open: false,
