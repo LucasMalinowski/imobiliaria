@@ -1,4 +1,3 @@
-import { redirect } from 'next/navigation'
 import { createClient } from '@/lib/supabase/server'
 import { AdminSidebar } from '@/components/admin/AdminSidebar'
 
@@ -10,8 +9,9 @@ export default async function AdminLayout({ children }: AdminLayoutProps) {
   const supabase = await createClient()
   const { data: { user } } = await supabase.auth.getUser()
 
+  // Login page: no sidebar, no redirect (middleware already protects other routes)
   if (!user) {
-    redirect('/admin/login')
+    return <>{children}</>
   }
 
   return (
