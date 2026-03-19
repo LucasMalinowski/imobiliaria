@@ -76,7 +76,25 @@ insert into configuracoes (chave, valor) values
   ('endereco_empresa', 'Rua das Flores, 123 - São Paulo, SP'),
   ('instagram', ''),
   ('facebook', ''),
-  ('slogan', 'Encontre o imóvel dos seus sonhos');
+  ('slogan', 'Encontre o imóvel dos seus sonhos'),
+  ('stat1_valor', '500+'),
+  ('stat1_label', 'Imóveis disponíveis'),
+  ('stat2_valor', '15+'),
+  ('stat2_label', 'Anos de experiência'),
+  ('stat3_valor', '2.000+'),
+  ('stat3_label', 'Clientes satisfeitos'),
+  ('stat4_valor', '98%'),
+  ('stat4_label', 'Taxa de satisfação');
+
+-- If schema already exists, insert missing stat keys only:
+-- insert into configuracoes (chave, valor)
+-- select * from (values
+--   ('stat1_valor','500+'), ('stat1_label','Imóveis disponíveis'),
+--   ('stat2_valor','15+'), ('stat2_label','Anos de experiência'),
+--   ('stat3_valor','2.000+'), ('stat3_label','Clientes satisfeitos'),
+--   ('stat4_valor','98%'), ('stat4_label','Taxa de satisfação')
+-- ) as v(chave, valor)
+-- on conflict (chave) do nothing;
 
 -- RLS Policies
 alter table profiles enable row level security;

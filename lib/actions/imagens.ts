@@ -2,8 +2,7 @@
 
 import { createClient } from '@/lib/supabase/server'
 import type { ImovelImagem, ActionResult } from '@/types'
-
-export const BUCKET_NAME = 'imoveis-imagens'
+import { BUCKET_NAME } from '@/lib/constants'
 
 /**
  * Saves image metadata to the database AFTER the client has already

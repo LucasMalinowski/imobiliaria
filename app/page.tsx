@@ -7,9 +7,37 @@ import { PropertyCard } from '@/components/public/PropertyCard'
 import { PropertyTypeGrid } from '@/components/public/PropertyTypeGrid'
 import { WhatsAppButton } from '@/components/public/WhatsAppButton'
 import { getImoveisDestaque } from '@/lib/actions/imoveis'
+import { createClient } from '@/lib/supabase/server'
+
+async function getSiteStats() {
+  try {
+    const supabase = await createClient()
+    const { data } = await supabase
+      .from('configuracoes')
+      .select('chave, valor')
+      .in('chave', ['stat1_valor', 'stat1_label', 'stat2_valor', 'stat2_label', 'stat3_valor', 'stat3_label', 'stat4_valor', 'stat4_label'])
+
+    if (!data || data.length === 0) return null
+
+    const map: Record<string, string> = {}
+    data.forEach(({ chave, valor }) => { if (valor) map[chave] = valor })
+
+    return [
+      { value: map.stat1_valor ?? '500+',   label: map.stat1_label ?? 'Imóveis disponíveis' },
+      { value: map.stat2_valor ?? '15+',    label: map.stat2_label ?? 'Anos de experiência' },
+      { value: map.stat3_valor ?? '2.000+', label: map.stat3_label ?? 'Clientes satisfeitos' },
+      { value: map.stat4_valor ?? '98%',    label: map.stat4_label ?? 'Taxa de satisfação' },
+    ]
+  } catch {
+    return null
+  }
+}
 
 export default async function HomePage() {
-  const imoveisDestaque = await getImoveisDestaque()
+  const [imoveisDestaque, stats] = await Promise.all([
+    getImoveisDestaque(),
+    getSiteStats(),
+  ])
 
   return (
     <>
@@ -17,7 +45,7 @@ export default async function HomePage() {
 
       <main>
         {/* Hero Section */}
-        <HeroSection />
+        <HeroSection stats={stats ?? undefined} />
 
         {/* Featured Properties */}
         <section className="py-20 bg-white">
@@ -118,20 +146,20 @@ export default async function HomePage() {
               </div>
 
               <div className="grid grid-cols-2 gap-5">
-                {[
-                  { value: '15+', label: 'Anos no mercado', color: 'bg-primary-500' },
-                  { value: '500+', label: 'Imóveis vendidos', color: 'bg-accent-500' },
-                  { value: '2.000+', label: 'Clientes atendidos', color: 'bg-green-500' },
-                  { value: '98%', label: 'De satisfação', color: 'bg-purple-600' },
-                ].map(({ value, label, color }) => (
-                  <div
-                    key={label}
-                    className={`${color} rounded-2xl p-8 text-white text-center shadow-lg`}
-                  >
-                    <p className="text-4xl font-bold mb-2">{value}</p>
-                    <p className="text-sm text-white/80">{label}</p>
-                  </div>
-                ))}
+                {(stats ?? [
+                  { value: '500+', label: 'Imóveis disponíveis' },
+                  { value: '15+', label: 'Anos de experiência' },
+                  { value: '2.000+', label: 'Clientes satisfeitos' },
+                  { value: '98%', label: 'Taxa de satisfação' },
+                ]).map(({ value, label }, i) => {
+                  const colors = ['bg-primary-500', 'bg-accent-500', 'bg-green-500', 'bg-purple-600']
+                  return (
+                    <div key={i} className={`${colors[i]} rounded-2xl p-8 text-white text-center shadow-lg`}>
+                      <p className="text-4xl font-bold mb-2">{value}</p>
+                      <p className="text-sm text-white/80">{label}</p>
+                    </div>
+                  )
+                })}
               </div>
             </div>
           </div>

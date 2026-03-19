@@ -5,7 +5,25 @@ import { useRouter } from 'next/navigation'
 import { Search, TrendingUp, Home, Award } from 'lucide-react'
 import { cn } from '@/lib/utils'
 
-export function HeroSection() {
+interface StatItem {
+  value: string
+  label: string
+}
+
+interface HeroSectionProps {
+  stats?: StatItem[]
+}
+
+const DEFAULT_STATS: StatItem[] = [
+  { value: '500+', label: 'Imóveis disponíveis' },
+  { value: '15+', label: 'Anos de experiência' },
+  { value: '2.000+', label: 'Clientes satisfeitos' },
+  { value: '98%', label: 'Taxa de satisfação' },
+]
+
+const STAT_ICONS = [Home, TrendingUp, Award, Search]
+
+export function HeroSection({ stats = DEFAULT_STATS }: HeroSectionProps) {
   const router = useRouter()
   const [finalidade, setFinalidade] = useState('venda')
   const [busca, setBusca] = useState('')
@@ -133,20 +151,18 @@ export function HeroSection() {
       <div className="absolute bottom-0 left-0 right-0 z-10">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="bg-white/95 backdrop-blur-md rounded-t-2xl shadow-2xl px-6 py-5 grid grid-cols-2 md:grid-cols-4 gap-5 divide-x divide-gray-100">
-            {[
-              { icon: Home, value: '500+', label: 'Imóveis disponíveis' },
-              { icon: TrendingUp, value: '15+', label: 'Anos de experiência' },
-              { icon: Award, value: '2.000+', label: 'Clientes satisfeitos' },
-              { icon: Search, value: '98%', label: 'Taxa de satisfação' },
-            ].map(({ icon: Icon, value, label }) => (
-              <div key={label} className="text-center pl-5 first:pl-0">
-                <div className="flex items-center justify-center gap-2 mb-1">
-                  <Icon className="w-4 h-4 text-accent-500" />
-                  <span className="text-2xl font-bold text-primary-500">{value}</span>
+            {stats.map(({ value, label }, i) => {
+              const Icon = STAT_ICONS[i] ?? Home
+              return (
+                <div key={i} className="text-center pl-5 first:pl-0">
+                  <div className="flex items-center justify-center gap-2 mb-1">
+                    <Icon className="w-4 h-4 text-accent-500" />
+                    <span className="text-2xl font-bold text-primary-500">{value}</span>
+                  </div>
+                  <p className="text-xs text-gray-500">{label}</p>
                 </div>
-                <p className="text-xs text-gray-500">{label}</p>
-              </div>
-            ))}
+              )
+            })}
           </div>
         </div>
       </div>

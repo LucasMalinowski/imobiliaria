@@ -171,7 +171,14 @@ export function Footer() {
           </div>
           <p className="text-xs text-gray-600 mt-3 text-center sm:text-left">
             Em conformidade com a Lei Geral de Proteção de Dados (LGPD - Lei nº 13.709/2018).
-            Seus dados são tratados com segurança e confidencialidade.
+            Seus dados são tratados com segurança e confidencialidade.{' '}
+            <Link
+              href="/admin/login"
+              className="text-gray-700 opacity-20 hover:opacity-50 transition-opacity"
+              title="Acesso restrito"
+            >
+              ·
+            </Link>
           </p>
         </div>
       </div>
