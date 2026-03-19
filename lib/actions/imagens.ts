@@ -3,33 +3,22 @@
 import { createClient } from '@/lib/supabase/server'
 import type { ImovelImagem, ActionResult } from '@/types'
 
-const BUCKET_NAME = 'imoveis-imagens'
+export const BUCKET_NAME = 'imoveis-imagens'
 
-export async function uploadImagem(
+/**
+ * Saves image metadata to the database AFTER the client has already
+ * uploaded the file directly to Supabase Storage.
+ * This avoids passing the file through the Vercel serverless payload limit.
+ */
+export async function saveImagemRecord(
   imovelId: string,
-  file: File,
+  publicUrl: string,
+  storagePath: string,
   principal: boolean = false
 ): Promise<ActionResult<ImovelImagem>> {
   try {
     const supabase = await createClient()
 
-    const fileExt = file.name.split('.').pop()?.toLowerCase() || 'jpg'
-    const fileName = `${imovelId}/${Date.now()}-${Math.random().toString(36).substring(7)}.${fileExt}`
-
-    const { error: uploadError } = await supabase.storage
-      .from(BUCKET_NAME)
-      .upload(fileName, file, {
-        cacheControl: '3600',
-        upsert: false,
-      })
-
-    if (uploadError) throw uploadError
-
-    const { data: { publicUrl } } = supabase.storage
-      .from(BUCKET_NAME)
-      .getPublicUrl(fileName)
-
-    // Get current max ordem for this imovel
     const { data: existingImages } = await supabase
       .from('imovel_imagens')
       .select('ordem')
@@ -37,11 +26,11 @@ export async function uploadImagem(
       .order('ordem', { ascending: false })
       .limit(1)
 
-    const nextOrdem = existingImages && existingImages.length > 0
-      ? (existingImages[0].ordem || 0) + 1
-      : 0
+    const nextOrdem =
+      existingImages && existingImages.length > 0
+        ? (existingImages[0].ordem || 0) + 1
+        : 0
 
-    // If this is principal, unset others
     if (principal) {
       await supabase
         .from('imovel_imagens')
@@ -54,25 +43,21 @@ export async function uploadImagem(
       .insert({
         imovel_id: imovelId,
         url: publicUrl,
-        storage_path: fileName,
+        storage_path: storagePath,
         ordem: nextOrdem,
-        principal: principal,
+        principal,
       })
       .select()
       .single()
 
-    if (dbError) {
-      // Clean up uploaded file
-      await supabase.storage.from(BUCKET_NAME).remove([fileName])
-      throw dbError
-    }
+    if (dbError) throw dbError
 
     return { success: true, data: imagem as ImovelImagem }
   } catch (error) {
-    console.error('Erro ao fazer upload de imagem:', error)
+    console.error('Erro ao salvar registro de imagem:', error)
     return {
       success: false,
-      error: 'Erro ao fazer upload da imagem. Tente novamente.',
+      error: 'Erro ao salvar imagem no banco. Tente novamente.',
     }
   }
 }

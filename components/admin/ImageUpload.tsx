@@ -2,16 +2,9 @@
 
 import { useState, useRef, useCallback } from 'react'
 import Image from 'next/image'
-import {
-  Upload,
-  X,
-  Star,
-  Loader2,
-  ImagePlus,
-  AlertCircle,
-  CheckCircle2,
-} from 'lucide-react'
-import { uploadImagem, deleteImagem, setImagemPrincipal } from '@/lib/actions/imagens'
+import { X, Star, Loader2, ImagePlus, AlertCircle, CheckCircle2 } from 'lucide-react'
+import { saveImagemRecord, deleteImagem, setImagemPrincipal, BUCKET_NAME } from '@/lib/actions/imagens'
+import { createClient } from '@/lib/supabase/client'
 import { cn } from '@/lib/utils'
 import type { ImovelImagem } from '@/types'
 
@@ -22,7 +15,7 @@ interface ImageUploadProps {
 }
 
 interface UploadState {
-  file: File
+  name: string
   progress: 'uploading' | 'success' | 'error'
   error?: string
 }
@@ -39,48 +32,55 @@ export function ImageUpload({ imovelId, imagens, onUpdate }: ImageUploadProps) {
       const imageFiles = files.filter((f) => f.type.startsWith('image/'))
       if (imageFiles.length === 0) return
 
-      const newUploads: UploadState[] = imageFiles.map((file) => ({
-        file,
-        progress: 'uploading',
-      }))
+      setUploads(imageFiles.map((f) => ({ name: f.name, progress: 'uploading' })))
 
-      setUploads((prev) => [...prev, ...newUploads])
+      const supabase = createClient()
 
       for (let i = 0; i < imageFiles.length; i++) {
         const file = imageFiles[i]
         const isPrincipal = imagens.length === 0 && i === 0
+        const fileExt = file.name.split('.').pop()?.toLowerCase() || 'jpg'
+        const storagePath = `${imovelId}/${Date.now()}-${Math.random().toString(36).slice(2)}.${fileExt}`
 
         try {
-          const result = await uploadImagem(imovelId, file, isPrincipal)
+          // Upload directly from browser → Supabase Storage (no Vercel payload limit)
+          const { error: uploadError } = await supabase.storage
+            .from(BUCKET_NAME)
+            .upload(storagePath, file, { cacheControl: '3600', upsert: false })
+
+          if (uploadError) throw uploadError
+
+          const { data: { publicUrl } } = supabase.storage
+            .from(BUCKET_NAME)
+            .getPublicUrl(storagePath)
+
+          // Only the tiny metadata goes through the Server Action
+          const result = await saveImagemRecord(imovelId, publicUrl, storagePath, isPrincipal)
 
           if (result.success) {
             setUploads((prev) =>
-              prev.map((u) =>
-                u.file === file ? { ...u, progress: 'success' } : u
-              )
+              prev.map((u) => (u.name === file.name ? { ...u, progress: 'success' } : u))
             )
             onUpdate()
           } else {
+            // Clean up orphaned storage file
+            await supabase.storage.from(BUCKET_NAME).remove([storagePath])
             setUploads((prev) =>
               prev.map((u) =>
-                u.file === file
-                  ? { ...u, progress: 'error', error: result.error }
-                  : u
+                u.name === file.name ? { ...u, progress: 'error', error: result.error } : u
               )
             )
           }
-        } catch {
+        } catch (err) {
+          console.error(err)
           setUploads((prev) =>
             prev.map((u) =>
-              u.file === file
-                ? { ...u, progress: 'error', error: 'Erro ao fazer upload' }
-                : u
+              u.name === file.name ? { ...u, progress: 'error', error: 'Erro ao enviar' } : u
             )
           )
         }
       }
 
-      // Clean up successful uploads after delay
       setTimeout(() => {
         setUploads((prev) => prev.filter((u) => u.progress !== 'success'))
       }, 3000)
@@ -92,61 +92,46 @@ export function ImageUpload({ imovelId, imagens, onUpdate }: ImageUploadProps) {
     (e: React.DragEvent) => {
       e.preventDefault()
       setIsDragging(false)
-      const files = Array.from(e.dataTransfer.files)
-      handleFiles(files)
+      handleFiles(Array.from(e.dataTransfer.files))
     },
     [handleFiles]
   )
 
   const handleFileInput = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const files = Array.from(e.target.files || [])
-    handleFiles(files)
+    handleFiles(Array.from(e.target.files || []))
     if (fileInputRef.current) fileInputRef.current.value = ''
   }
 
   const handleDelete = async (imagem: ImovelImagem) => {
     if (!confirm('Tem certeza que deseja excluir esta imagem?')) return
-
     setDeletingId(imagem.id)
     const result = await deleteImagem(imagem.id, imagem.storage_path)
     setDeletingId(null)
-
-    if (result.success) {
-      onUpdate()
-    } else {
-      alert(result.error || 'Erro ao excluir imagem')
-    }
+    if (result.success) onUpdate()
+    else alert(result.error || 'Erro ao excluir imagem')
   }
 
   const handleSetPrincipal = async (imagem: ImovelImagem) => {
     if (imagem.principal) return
-
     setSettingPrincipalId(imagem.id)
     const result = await setImagemPrincipal(imagem.id, imovelId)
     setSettingPrincipalId(null)
-
-    if (result.success) {
-      onUpdate()
-    } else {
-      alert(result.error || 'Erro ao definir imagem principal')
-    }
+    if (result.success) onUpdate()
+    else alert(result.error || 'Erro ao definir imagem principal')
   }
 
   return (
     <div className="space-y-5">
       {/* Drop Zone */}
       <div
-        onDragOver={(e) => {
-          e.preventDefault()
-          setIsDragging(true)
-        }}
+        onDragOver={(e) => { e.preventDefault(); setIsDragging(true) }}
         onDragLeave={() => setIsDragging(false)}
         onDrop={handleDrop}
         onClick={() => fileInputRef.current?.click()}
         className={cn(
           'border-2 border-dashed rounded-2xl p-10 text-center cursor-pointer transition-all duration-200',
           isDragging
-            ? 'border-accent-500 bg-accent-50'
+            ? 'border-accent-500 bg-amber-50'
             : 'border-gray-200 hover:border-primary-400 hover:bg-gray-50'
         )}
       >
@@ -167,9 +152,7 @@ export function ImageUpload({ imovelId, imagens, onUpdate }: ImageUploadProps) {
         <p className="text-base font-medium text-gray-700 mb-1">
           {isDragging ? 'Solte as imagens aqui' : 'Clique ou arraste imagens'}
         </p>
-        <p className="text-sm text-gray-400">
-          PNG, JPG, WEBP até 10MB cada. Múltiplos arquivos permitidos.
-        </p>
+        <p className="text-sm text-gray-400">PNG, JPG, WEBP. Múltiplos arquivos permitidos.</p>
       </div>
 
       {/* Upload Progress */}
@@ -194,9 +177,7 @@ export function ImageUpload({ imovelId, imagens, onUpdate }: ImageUploadProps) {
               ) : (
                 <AlertCircle className="w-4 h-4 text-red-500 shrink-0" />
               )}
-              <span className="flex-1 text-sm text-gray-700 truncate">
-                {upload.file.name}
-              </span>
+              <span className="flex-1 text-sm text-gray-700 truncate">{upload.name}</span>
               <span className="text-xs text-gray-500">
                 {upload.progress === 'uploading'
                   ? 'Enviando...'
@@ -236,7 +217,6 @@ export function ImageUpload({ imovelId, imagens, onUpdate }: ImageUploadProps) {
                   />
                 </div>
 
-                {/* Principal badge */}
                 {imagem.principal && (
                   <div className="absolute top-1.5 left-1.5 bg-accent-500 text-white text-xs px-2 py-0.5 rounded-full flex items-center gap-1">
                     <Star className="w-3 h-3 fill-white" />
@@ -244,7 +224,6 @@ export function ImageUpload({ imovelId, imagens, onUpdate }: ImageUploadProps) {
                   </div>
                 )}
 
-                {/* Overlay actions */}
                 <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center gap-2">
                   {!imagem.principal && (
                     <button
