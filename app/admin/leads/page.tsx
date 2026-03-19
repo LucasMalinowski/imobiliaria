@@ -1,7 +1,7 @@
 'use client'
 
 import { useState, useEffect, useCallback } from 'react'
-import { Users, Mail, Search, Loader2, Download } from 'lucide-react'
+import { Loader2, Download } from 'lucide-react'
 import { getLeads } from '@/lib/actions/leads'
 import { LeadsTable } from '@/components/admin/LeadsTable'
 import { Button } from '@/components/ui/Button'

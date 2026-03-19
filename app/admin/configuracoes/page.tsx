@@ -168,7 +168,7 @@ export default function ConfiguracoesPage() {
             <h2 className="text-base font-semibold text-gray-900">Estatísticas do Site</h2>
           </div>
           <p className="text-sm text-gray-400 mb-5 pb-3 border-b border-gray-100">
-            Esses números aparecem no banner principal e na seção "Por que nos escolher".
+            Esses números aparecem no banner principal e na seção &quot;Por que nos escolher&quot;.
           </p>
 
           <div className="space-y-4">

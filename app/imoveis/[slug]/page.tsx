@@ -7,7 +7,6 @@ import {
   Bath,
   Car,
   Maximize2,
-  Calendar,
   Share2,
   ChevronRight,
   Home,

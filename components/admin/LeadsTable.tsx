@@ -14,7 +14,7 @@ interface LeadsTableProps {
 }
 
 export function LeadsTable({ leads, onUpdate }: LeadsTableProps) {
-  const [isPending, startTransition] = useTransition()
+  const [, startTransition] = useTransition()
   const [processingId, setProcessingId] = useState<string | null>(null)
 
   const handleMarcarLido = (id: string) => {

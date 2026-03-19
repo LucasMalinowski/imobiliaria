@@ -1,6 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { Resend } from 'resend'
-import { createClient } from '@/lib/supabase/server'
 import type { Lead } from '@/types'
 
 export async function POST(request: NextRequest) {

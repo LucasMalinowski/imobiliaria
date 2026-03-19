@@ -3,7 +3,7 @@
 import { useState, useEffect } from 'react'
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
-import { Menu, X, Phone, Home, Building2, MessageCircle } from 'lucide-react'
+import { Menu, X, Home, Building2, MessageCircle } from 'lucide-react'
 import { cn } from '@/lib/utils'
 
 const whatsappNumber = process.env.NEXT_PUBLIC_WHATSAPP_NUMBER || '5511999999999'

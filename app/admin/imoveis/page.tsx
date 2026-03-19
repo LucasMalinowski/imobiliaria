@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect, useTransition, useCallback } from 'react'
+import { useState, useEffect, useCallback } from 'react'
 import Link from 'next/link'
 import Image from 'next/image'
 import {
@@ -8,8 +8,6 @@ import {
   Search,
   Edit2,
   Trash2,
-  Eye,
-  EyeOff,
   Star,
   ExternalLink,
   ChevronLeft,
@@ -39,7 +37,7 @@ export default function AdminImoveisPage() {
   const [busca, setBusca] = useState('')
   const [buscaInput, setBuscaInput] = useState('')
   const [isLoading, setIsLoading] = useState(true)
-  const [isPending, startTransition] = useTransition()
+  useTransition()
 
   const [deleteModal, setDeleteModal] = useState<{ open: boolean; imovel: Imovel | null }>({
     open: false,

@@ -3,7 +3,6 @@ import { notFound } from 'next/navigation'
 import Link from 'next/link'
 import { ChevronLeft, Eye } from 'lucide-react'
 import { PropertyForm } from '@/components/admin/PropertyForm'
-import { ImageUpload } from '@/components/admin/ImageUpload'
 import { getImovelById } from '@/lib/actions/imoveis'
 import RefreshOnUpload from './RefreshOnUpload'
 

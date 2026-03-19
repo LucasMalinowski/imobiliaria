@@ -6,10 +6,9 @@ import { PropertyCard } from '@/components/public/PropertyCard'
 import { SearchFilters } from '@/components/public/SearchFilters'
 import { WhatsAppButton } from '@/components/public/WhatsAppButton'
 import { PropertyGridSkeleton } from '@/components/ui/Skeleton'
-import { Pagination } from '@/components/ui/Pagination'
 import { getImoveis } from '@/lib/actions/imoveis'
-import { SlidersHorizontal, Building2 } from 'lucide-react'
-import type { FiltrosImovel, Finalidade, TipoImovel, StatusImovel } from '@/types'
+import { Building2 } from 'lucide-react'
+import type { FiltrosImovel, Finalidade, TipoImovel } from '@/types'
 import PaginacaoClient from './PaginacaoClient'
 
 export const metadata: Metadata = {
