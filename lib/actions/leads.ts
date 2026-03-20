@@ -7,7 +7,8 @@ import type { LeadFormData } from '@/lib/validations/lead'
 const PER_PAGE = 20
 
 export async function createLead(
-  data: LeadFormData
+  data: LeadFormData,
+  sessionId?: string
 ): Promise<ActionResult<Lead>> {
   try {
     const supabase = await createClient()
@@ -21,6 +22,7 @@ export async function createLead(
         mensagem: data.mensagem || null,
         imovel_id: data.imovel_id || null,
         imovel_titulo: data.imovel_titulo || null,
+        session_id: sessionId || null,
       })
       .select()
       .single()
@@ -62,7 +64,7 @@ export async function getLeads(
 
     let query = supabase
       .from('leads')
-      .select('*', { count: 'exact' })
+      .select('*, session:visitor_sessions(city, country_code, browser, browser_version, os, device_type, utm_source, utm_campaign)', { count: 'exact' })
       .order('created_at', { ascending: false })
       .range(offset, offset + PER_PAGE - 1)
 

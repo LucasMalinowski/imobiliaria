@@ -1,5 +1,6 @@
 import type { Metadata } from 'next'
 import { Inter } from 'next/font/google'
+import { CookieConsent } from '@/components/public/CookieConsent'
 import './globals.css'
 
 const inter = Inter({
@@ -56,6 +57,7 @@ export default function RootLayout({
     <html lang="pt-BR" className={inter.variable}>
       <body className={`${inter.className} antialiased`}>
         {children}
+        <CookieConsent />
       </body>
     </html>
   )

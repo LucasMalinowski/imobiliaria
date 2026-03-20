@@ -56,6 +56,9 @@ export function LeadsTable({ leads, onUpdate }: LeadsTableProps) {
                 Imóvel
               </th>
               <th className="px-4 py-3 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">
+                Origem
+              </th>
+              <th className="px-4 py-3 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">
                 Data
               </th>
               <th className="px-4 py-3 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">
@@ -131,6 +134,37 @@ export function LeadsTable({ leads, onUpdate }: LeadsTableProps) {
                     </div>
                   ) : (
                     <span className="text-gray-400 text-sm">—</span>
+                  )}
+                </td>
+
+                {/* Origem (session data) */}
+                <td className="px-4 py-4">
+                  {lead.session ? (
+                    <div className="space-y-1 text-xs text-gray-500">
+                      {(lead.session.city || lead.session.country_code) && (
+                        <p className="font-medium text-gray-700">
+                          {[lead.session.city, lead.session.country_code].filter(Boolean).join(', ')}
+                        </p>
+                      )}
+                      {lead.session.browser && (
+                        <p>{lead.session.browser} {lead.session.browser_version} · {lead.session.os}</p>
+                      )}
+                      {lead.session.device_type && (
+                        <span className={cn(
+                          'inline-block px-1.5 py-0.5 rounded text-xs font-medium',
+                          lead.session.device_type === 'mobile'  ? 'bg-blue-50 text-blue-600'  :
+                          lead.session.device_type === 'tablet'  ? 'bg-purple-50 text-purple-600' :
+                          'bg-gray-100 text-gray-600'
+                        )}>
+                          {lead.session.device_type}
+                        </span>
+                      )}
+                      {lead.session.utm_source && (
+                        <p className="text-green-600">UTM: {lead.session.utm_source}</p>
+                      )}
+                    </div>
+                  ) : (
+                    <span className="text-gray-300 text-xs">—</span>
                   )}
                 </td>
 

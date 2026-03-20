@@ -50,6 +50,48 @@ export interface Imovel {
   imagens?: ImovelImagem[]
 }
 
+export interface VisitorSession {
+  id: string
+  fingerprint?: string
+  ip_address?: string
+  country?: string
+  country_code?: string
+  region?: string
+  city?: string
+  latitude?: number
+  longitude?: number
+  isp?: string
+  org?: string
+  user_agent?: string
+  browser?: string
+  browser_version?: string
+  os?: string
+  os_version?: string
+  device_type?: 'mobile' | 'tablet' | 'desktop' | 'unknown'
+  screen_resolution?: string
+  viewport?: string
+  color_depth?: number
+  touch_support?: boolean
+  language?: string
+  timezone?: string
+  cookies_enabled?: boolean
+  do_not_track?: boolean
+  hardware_concurrency?: number
+  device_memory?: number
+  connection_type?: string
+  referrer?: string
+  utm_source?: string
+  utm_medium?: string
+  utm_campaign?: string
+  utm_term?: string
+  utm_content?: string
+  landing_page?: string
+  consent_analytics?: boolean
+  consent_marketing?: boolean
+  consent_timestamp?: string
+  created_at: string
+}
+
 export interface Lead {
   id: string
   imovel_id?: string
@@ -59,6 +101,8 @@ export interface Lead {
   telefone?: string
   mensagem?: string
   lido: boolean
+  session_id?: string
+  session?: VisitorSession
   created_at: string
 }
 

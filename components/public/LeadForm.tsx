@@ -6,6 +6,7 @@ import { zodResolver } from '@hookform/resolvers/zod'
 import { Send, CheckCircle2, AlertCircle } from 'lucide-react'
 import { leadSchema, type LeadFormData } from '@/lib/validations/lead'
 import { createLead } from '@/lib/actions/leads'
+import { getVisitorSessionId } from '@/components/public/CookieConsent'
 import { Button } from '@/components/ui/Button'
 import { Input } from '@/components/ui/Input'
 
@@ -36,7 +37,8 @@ export function LeadForm({ imovelId, imovelTitulo, className }: LeadFormProps) {
   const onSubmit = async (data: LeadFormData) => {
     try {
       setStatus('idle')
-      const result = await createLead(data)
+      const sessionId = getVisitorSessionId() ?? undefined
+      const result = await createLead(data, sessionId)
 
       if (result.success) {
         setStatus('success')
