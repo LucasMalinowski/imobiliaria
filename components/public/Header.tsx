@@ -31,14 +31,17 @@ export function Header() {
     setIsMenuOpen(false)
   }, [pathname])
 
+  // On the homepage, start transparent and become solid on scroll.
+  // On all other pages, always use the solid/scrolled style.
+  const isHomepage = pathname === '/'
+  const useSolid = !isHomepage || isScrolled
+
   return (
     <>
       <header
         className={cn(
           'fixed top-0 left-0 right-0 z-40 transition-all duration-300',
-          isScrolled
-            ? 'bg-white shadow-nav'
-            : 'bg-transparent'
+          useSolid ? 'bg-white shadow-nav' : 'bg-transparent'
         )}
       >
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -52,7 +55,7 @@ export function Header() {
                 <span
                   className={cn(
                     'font-bold text-lg leading-tight transition-colors',
-                    isScrolled ? 'text-primary-500' : 'text-white'
+                    useSolid ? 'text-primary-500' : 'text-white'
                   )}
                 >
                   {siteName}
@@ -69,10 +72,10 @@ export function Header() {
                   className={cn(
                     'px-4 py-2 rounded-lg font-medium text-sm transition-all duration-200',
                     pathname === link.href
-                      ? isScrolled
+                      ? useSolid
                         ? 'text-primary-500 bg-primary-50'
                         : 'text-white bg-white/20'
-                      : isScrolled
+                      : useSolid
                       ? 'text-gray-600 hover:text-primary-500 hover:bg-gray-50'
                       : 'text-white/80 hover:text-white hover:bg-white/10'
                   )}
@@ -90,7 +93,7 @@ export function Header() {
                 rel="noopener noreferrer"
                 className={cn(
                   'flex items-center gap-2 px-4 py-2 rounded-lg font-semibold text-sm transition-all duration-200',
-                  isScrolled
+                  useSolid
                     ? 'bg-green-500 hover:bg-green-600 text-white shadow-md'
                     : 'bg-white/90 hover:bg-white text-green-700 shadow-md'
                 )}
@@ -105,7 +108,7 @@ export function Header() {
               onClick={() => setIsMenuOpen(!isMenuOpen)}
               className={cn(
                 'md:hidden p-2 rounded-lg transition-colors',
-                isScrolled
+                useSolid
                   ? 'text-gray-600 hover:bg-gray-100'
                   : 'text-white hover:bg-white/10'
               )}

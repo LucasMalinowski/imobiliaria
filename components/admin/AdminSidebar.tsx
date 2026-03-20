@@ -44,6 +44,13 @@ const navItems = [
     icon: Settings,
     description: 'Configurar sistema',
   },
+  {
+    href: '/',
+    label: 'Ver site',
+    icon: ExternalLink,
+    description: 'Abrir site público',
+    external: true,
+  },
 ]
 
 interface AdminSidebarProps {
@@ -72,9 +79,10 @@ export function AdminSidebar({ userEmail }: AdminSidebarProps) {
       {/* Navigation */}
       <nav className="flex-1 p-4 space-y-1 overflow-y-auto">
         {navItems.map((item) => {
-          const isActive =
+          const isActive = !item.external && (
             pathname === item.href ||
             (item.href !== '/admin/dashboard' && pathname.startsWith(item.href))
+          )
           const Icon = item.icon
 
           return (
@@ -82,6 +90,7 @@ export function AdminSidebar({ userEmail }: AdminSidebarProps) {
               key={item.href}
               href={item.href}
               onClick={() => setMobileOpen(false)}
+              {...(item.external ? { target: '_blank', rel: 'noopener noreferrer' } : {})}
               className={cn(
                 'flex items-center gap-3 px-4 py-3 rounded-xl transition-all duration-200 group',
                 isActive
@@ -117,17 +126,6 @@ export function AdminSidebar({ userEmail }: AdminSidebarProps) {
             <p className="text-white/80 text-sm font-medium truncate">{userEmail}</p>
           </div>
         )}
-
-        <Link
-          href="/"
-          target="_blank"
-          rel="noopener noreferrer"
-          onClick={() => setMobileOpen(false)}
-          className="w-full flex items-center gap-3 px-4 py-3 rounded-xl text-white/60 hover:text-white hover:bg-white/10 transition-all duration-200 text-sm mb-1"
-        >
-          <ExternalLink className="w-5 h-5 shrink-0" />
-          <span>Ver site</span>
-        </Link>
 
         <form action={signOut}>
           <button
