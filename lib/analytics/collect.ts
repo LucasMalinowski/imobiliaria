@@ -182,6 +182,7 @@ interface IPData {
   city?: string
   latitude?: number
   longitude?: number
+  isp?: string   // parsed from org field
   org?: string
 }
 
@@ -191,7 +192,19 @@ async function getIPLocation(): Promise<IPData> {
       signal: AbortSignal.timeout(5000),
     })
     if (!res.ok) throw new Error('ipapi error')
-    return await res.json()
+    const d = await res.json()
+    return {
+      ip:           d.ip,
+      country_name: d.country_name,
+      country_code: d.country_code,
+      region:       d.region,
+      city:         d.city,
+      latitude:     d.latitude,
+      longitude:    d.longitude,
+      org:          d.org,
+      // ipapi.co puts ISP info in `org` — extract the name part after "AS12345 "
+      isp: d.org ? d.org.replace(/^AS\d+\s+/, '') : undefined,
+    }
   } catch {
     // Fallback to freeipapi.com
     try {

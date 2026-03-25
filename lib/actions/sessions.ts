@@ -54,11 +54,14 @@ export async function saveSession(
       .select('id')
       .single()
 
-    if (error) throw error
+    if (error) {
+      console.error('Supabase error saving session:', JSON.stringify(error))
+      return { success: false, error: `DB error: ${error.message} (code: ${error.code})` }
+    }
 
     return { success: true, data: { id: session.id } }
   } catch (error) {
     console.error('Erro ao salvar sessão:', error)
-    return { success: false, error: 'Erro ao salvar sessão.' }
+    return { success: false, error: `Erro ao salvar sessão: ${error instanceof Error ? error.message : String(error)}` }
   }
 }
